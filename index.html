@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Wychodzimy! 🎒</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#e07a5f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Wychodzimy!">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+  :root {
+    --bg:      #fdf8f5;
+    --surface: #ffffff;
+    --border:  #ede4dc;
+    --text:    #2a1f1a;
+    --text2:   #8a6f65;
+    --accent:  #e07a5f;
+    --acc2:    #c45a40;
+    --green:   #3d9970;
+    --radius:  16px;
+    --font:    'Nunito', system-ui, sans-serif;
+    --cm: #d4607a; --cm-bg: #fde8ef;
+    --ca: #4e8dd9; --ca-bg: #deeafc;
+    --cb: #3d9970; --cb-bg: #d6f0e4;
+    --cr: #8f6ed4; --cr-bg: #ede5fb;
+  }
+  [data-dark="1"] {
+    --bg:#18110e; --surface:#2b1e19; --border:#3d2e28;
+    --text:#f5ede8; --text2:#9a7d74;
+    --cm-bg:#3b0f1e; --ca-bg:#0e2040; --cb-bg:#0e2e1e; --cr-bg:#1e1540;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;font-family:var(--font);background:var(--bg);color:var(--text);overflow:hidden}
+
+  /* ── SHELL ── */
+  #app{display:flex;flex-direction:column;height:100dvh;max-width:480px;margin:0 auto;background:var(--bg);position:relative}
+
+  /* ── HEADER ── */
+  .hdr{background:var(--surface);border-bottom:1.5px solid var(--border);flex-shrink:0;padding:11px 15px 0}
+  .hdr-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+  .app-ttl{font-size:19px;font-weight:900;color:var(--accent);letter-spacing:-.3px}
+  .hbtns{display:flex;gap:5px}
+  .ib{width:35px;height:35px;border:none;background:var(--bg);border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:background .12s}
+  .ib:active{background:var(--border)}
+
+  .prog-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .prog-bar{flex:1;height:7px;background:var(--border);border-radius:4px;overflow:hidden}
+  .prog-fill{height:100%;background:linear-gradient(90deg,var(--accent),#f4a261);border-radius:4px;transition:width .35s ease;width:0%}
+  .prog-txt{font-size:12px;font-weight:800;color:var(--text2);white-space:nowrap}
+
+  .pc-row{display:flex;align-items:center;gap:7px;margin-bottom:8px;flex-wrap:wrap}
+  .pc-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:20px;font-size:12px;font-weight:800;border:none;cursor:pointer;font-family:var(--font);transition:all .15s}
+  .pc-btn.active{background:var(--accent);color:#fff}
+  .pc-btn.inactive{background:var(--border);color:var(--text2)}
+  .pc-btn:active{opacity:.8}
+  .pc-x{width:14px;height:14px;background:rgba(0,0,0,.15);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:9px}
+
+  /* child filter */
+  .child-row{display:flex;gap:5px;margin-bottom:7px}
+  .chb{flex:1;padding:5px 3px;border:2px solid var(--border);background:var(--bg);border-radius:10px;font-size:10px;font-weight:800;cursor:pointer;color:var(--text2);font-family:var(--font);transition:all .15s;text-align:center;line-height:1.35}
+  .chb[data-c="all"].on     {border-color:var(--accent);background:var(--accent);color:#fff}
+  .chb[data-c="marysia"].on {border-color:var(--cm);background:var(--cm-bg);color:var(--cm)}
+  .chb[data-c="antos"].on   {border-color:var(--ca);background:var(--ca-bg);color:var(--ca)}
+  .chb[data-c="rodzic"].on  {border-color:var(--cr);background:var(--cr-bg);color:var(--cr)}
+
+  /* cat filter */
+  .cat-row{display:flex;gap:5px;overflow-x:auto;padding-bottom:9px;scrollbar-width:none}
+  .cat-row::-webkit-scrollbar{display:none}
+  .catc{flex-shrink:0;padding:4px 10px;border:1.5px solid var(--border);background:var(--bg);border-radius:20px;font-size:11px;font-weight:700;color:var(--text2);cursor:pointer;white-space:nowrap;font-family:var(--font);transition:all .15s}
+  .catc.on{background:var(--accent);border-color:var(--accent);color:#fff}
+
+  /* ── ALT HEADER ── */
+  .alt-hdr{background:var(--surface);border-bottom:1.5px solid var(--border);padding:14px 15px 11px;flex-shrink:0;display:none}
+  .alt-hdr h2{font-size:20px;font-weight:900;color:var(--text)}
+
+  /* ── CONTENT ── */
+  .content{flex:1;overflow-y:auto;padding:7px 12px;-webkit-overflow-scrolling:touch}
+
+  /* ── ITEMS ── */
+  .grp-hdr{font-size:10px;font-weight:900;color:var(--text2);text-transform:uppercase;letter-spacing:.09em;padding:12px 4px 5px}
+  .item{display:flex;align-items:center;gap:10px;padding:11px 12px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);margin-bottom:5px;cursor:pointer;transition:transform .15s,opacity .2s;position:relative;overflow:hidden}
+  .item:active{transform:scale(.984)}
+  .item.chk{opacity:.38}
+  .item.chk .iname{text-decoration:line-through;color:var(--text2)}
+  .item::before{content:'';position:absolute;left:0;top:5px;bottom:5px;width:3px;border-radius:2px}
+  .item[data-ch="marysia"]::before{background:var(--cm)}
+  .item[data-ch="antos"]::before  {background:var(--ca)}
+  .item[data-ch="oba"]::before    {background:var(--cb)}
+  .item[data-ch="rodzic"]::before {background:var(--cr)}
+  .cb{width:27px;height:27px;border:2px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--bg);transition:all .2s}
+  .item.chk .cb{background:var(--green);border-color:var(--green)}
+  .cbchk{color:#fff;font-size:13px;font-weight:900;opacity:0;transition:opacity .2s}
+  .item.chk .cbchk{opacity:1}
+  .iinfo{flex:1;min-width:0}
+  .iname{font-size:14px;font-weight:700;color:var(--text);line-height:1.3}
+  .imeta{display:flex;gap:3px;margin-top:3px;flex-wrap:wrap}
+  .badge{font-size:10px;padding:1px 5px;border-radius:4px;font-weight:800}
+  .b-req{background:#fde8e3;color:#b94030}
+  .b-sea{background:#fff3e0;color:#c17000}
+  .b-eme{background:#e3f0fd;color:#1a65b5}
+  .b-opt{background:#e6f5ee;color:#2d7d55}
+  .b-m{background:var(--cm-bg);color:var(--cm)}
+  .b-a{background:var(--ca-bg);color:var(--ca)}
+  .b-r{background:var(--cr-bg);color:var(--cr)}
+  [data-dark="1"] .b-req{background:#3b1510;color:#f4a090}
+  [data-dark="1"] .b-sea{background:#362200;color:#f4c060}
+  [data-dark="1"] .b-eme{background:#0c2540;color:#80b8f0}
+  [data-dark="1"] .b-opt{background:#0e2e1e;color:#70c090}
+  .edbtn{width:33px;height:33px;border:none;background:none;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:7px;font-size:14px;flex-shrink:0}
+  .edbtn:active{background:var(--bg)}
+
+  /* ── NAV ── */
+  .bnav{display:flex;background:var(--surface);border-top:1.5px solid var(--border);padding-bottom:env(safe-area-inset-bottom,0);flex-shrink:0}
+  .nb{flex:1;padding:8px 5px 6px;border:none;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--text2);font-size:10px;font-weight:800;font-family:var(--font);transition:color .15s}
+  .nb.on{color:var(--accent)}
+  .ni{font-size:18px}
+
+  /* ── FAB ── */
+  .fab{position:fixed;bottom:calc(56px + env(safe-area-inset-bottom,0));right:14px;width:50px;height:50px;background:var(--accent);color:#fff;border:none;border-radius:50%;font-size:26px;cursor:pointer;box-shadow:0 4px 16px rgba(224,122,95,.45);display:flex;align-items:center;justify-content:center;z-index:5;transition:transform .2s;font-family:var(--font)}
+  .fab:active{transform:scale(.86)}
+
+  /* ── MODAL ── */
+  .bdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:50;display:none;align-items:flex-end;justify-content:center}
+  .bdrop.show{display:flex}
+  .sheet{background:var(--surface);border-radius:22px 22px 0 0;width:100%;max-width:480px;max-height:93dvh;overflow-y:auto;padding:0 17px calc(20px + env(safe-area-inset-bottom,0));animation:up .26s cubic-bezier(.32,.72,0,1)}
+  @keyframes up{from{transform:translateY(100%)}to{transform:translateY(0)}}
+  .handle{width:34px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 15px}
+  .stitle{font-size:18px;font-weight:900;color:var(--text);margin-bottom:14px}
+
+  /* ── FORM ── */
+  .fg{margin-bottom:13px}
+  .fl{font-size:11px;font-weight:900;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;display:block}
+  .fi{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:11px;background:var(--bg);color:var(--text);font-size:16px;font-family:var(--font);outline:none}
+  .fi:focus{border-color:var(--accent)}
+  select.fi{appearance:none;cursor:pointer}
+
+  .tg{display:flex;flex-wrap:wrap;gap:6px}
+  .tb{padding:6px 11px;border:1.5px solid var(--border);border-radius:9px;background:var(--bg);color:var(--text2);font-size:12px;font-weight:800;cursor:pointer;font-family:var(--font);transition:all .15s}
+  .tb.on{border-color:var(--accent);background:var(--accent);color:#fff}
+
+  /* child selector */
+  .csel{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  .csb{padding:9px 7px;border:2px solid var(--border);border-radius:12px;background:var(--bg);cursor:pointer;text-align:center;font-family:var(--font);transition:all .15s}
+  .csb:active{transform:scale(.95)}
+  .csb .cse{font-size:21px}
+  .csb .csl{font-size:11px;font-weight:800;margin-top:3px;color:var(--text2)}
+  .csb.on-m{border-color:var(--cm);background:var(--cm-bg)} .csb.on-m .csl{color:var(--cm)}
+  .csb.on-a{border-color:var(--ca);background:var(--ca-bg)} .csb.on-a .csl{color:var(--ca)}
+  .csb.on-b{border-color:var(--cb);background:var(--cb-bg)} .csb.on-b .csl{color:var(--cb)}
+  .csb.on-r{border-color:var(--cr);background:var(--cr-bg)} .csb.on-r .csl{color:var(--cr)}
+
+  /* preset grid small (item modal) */
+  .pgrid-s{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .pgs{padding:8px 7px;border:1.5px solid var(--border);border-radius:10px;background:var(--bg);cursor:pointer;text-align:center;transition:all .15s}
+  .pgs:active{opacity:.7}
+  .pgs .pge{font-size:17px}
+  .pgs .pgn{font-size:10px;font-weight:800;color:var(--text2);margin-top:2px;line-height:1.2}
+  .pgs.on{border-color:var(--accent);background:rgba(224,122,95,.1)}
+  .pgs.on .pgn{color:var(--accent)}
+
+  /* buttons */
+  .btn{width:100%;padding:13px;border:none;border-radius:12px;font-size:14px;font-weight:800;font-family:var(--font);cursor:pointer;transition:transform .15s}
+  .btn:active{transform:scale(.96)}
+  .btn-p{background:var(--accent);color:#fff}
+  .btn-g{background:var(--bg);color:var(--text);border:1.5px solid var(--border)}
+  .btn-d{background:#fde8e3;color:#b94030}
+  [data-dark="1"] .btn-d{background:#3b1510;color:#f4a090}
+  .brow{display:flex;gap:8px;margin-top:12px}
+  .brow .btn{margin-top:0}
+
+  /* presets big grid */
+  .pgrid-l{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .pgc{padding:13px 9px;background:var(--bg);border:2px solid var(--border);border-radius:12px;cursor:pointer;transition:all .15s;text-align:center}
+  .pgc:active{transform:scale(.94)}
+  .pgc.sel{border-color:var(--accent);background:rgba(224,122,95,.1)}
+  .pgc .pe{font-size:24px}
+  .pgc .pn{font-size:12px;font-weight:800;color:var(--text);margin-top:4px;line-height:1.2}
+  .pgc .pct{font-size:11px;color:var(--text2);margin-top:2px}
+  .pgc .pa{font-size:11px;color:var(--accent);font-weight:800;margin-top:2px}
+
+  /* settings */
+  .sec-t{font-size:11px;font-weight:900;color:var(--text2);text-transform:uppercase;letter-spacing:.09em;padding:14px 4px 7px}
+  .si{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;margin-bottom:6px}
+  .si-l{font-size:14px;font-weight:700;color:var(--text)}
+  .si-d{font-size:11px;color:var(--text2);margin-top:1px}
+  .sw{width:43px;height:25px;background:var(--border);border-radius:13px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+  .sw.on{background:var(--accent)}
+  .sw::after{content:'';width:19px;height:19px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+  .sw.on::after{transform:translateX(18px)}
+
+  /* empty */
+  .empty{text-align:center;padding:44px 18px;color:var(--text2)}
+  .empty .ee{font-size:46px;margin-bottom:9px}
+  .empty p{font-size:14px;font-weight:700}
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ══ CHECKLIST HEADER ══ -->
+  <div class="hdr" id="cl-hdr">
+    <div class="hdr-top">
+      <div class="app-ttl">🎒 Wychodzimy!</div>
+      <div class="hbtns">
+        <button class="ib" id="dark-btn" onclick="toggleDark()">🌙</button>
+        <button class="ib" onclick="openModal('rst-modal')" title="Resetuj">↺</button>
+      </div>
+    </div>
+    <div class="prog-row">
+      <div class="prog-bar"><div class="prog-fill" id="pfill"></div></div>
+      <div class="prog-txt" id="ptxt">0 / 0</div>
+    </div>
+    <div class="pc-row">
+      <button class="pc-btn inactive" id="pc-btn" onclick="openModal('preset-modal')">
+        <span id="pc-lbl">🎒 Wybierz typ wyjścia</span>
+      </button>
+      <button class="btn-g" style="padding:4px 10px;border:1.5px solid var(--border);border-radius:20px;font-size:11px;font-weight:800;cursor:pointer;font-family:var(--font);background:var(--bg);color:var(--text2)" onclick="openModal('preset-modal')">Zmień</button>
+    </div>
+    <div class="child-row">
+      <button class="chb on" data-c="all"     onclick="setChild('all')"    >👪<br>Wszyscy</button>
+      <button class="chb"    data-c="marysia" onclick="setChild('marysia')">👧<br>Marysia</button>
+      <button class="chb"    data-c="antos"   onclick="setChild('antos')"  >👦<br>Antoś</button>
+      <button class="chb"    data-c="rodzic"  onclick="setChild('rodzic')" >🧑<br>Rodzic</button>
+    </div>
+    <div class="cat-row" id="cat-row"></div>
+  </div>
+
+  <!-- ══ ALT HEADER ══ -->
+  <div class="alt-hdr" id="alt-hdr"><h2 id="alt-ttl">Zestawy</h2></div>
+
+  <!-- ══ CONTENT ══ -->
+  <div class="content" id="content"></div>
+
+  <!-- ══ FAB ══ -->
+  <button class="fab" id="fab" onclick="openAddItem()">＋</button>
+
+  <!-- ══ NAV ══ -->
+  <nav class="bnav">
+    <button class="nb on" id="nb-cl" onclick="switchView('cl')"><span class="ni">✅</span>Checklista</button>
+    <button class="nb"    id="nb-pr" onclick="switchView('pr')"><span class="ni">🗂️</span>Zestawy</button>
+    <button class="nb"    id="nb-st" onclick="switchView('st')"><span class="ni">⚙️</span>Ustawienia</button>
+  </nav>
+</div>
+
+<!-- ══════════ MODAL: PRESET ══════════ -->
+<div class="bdrop" id="preset-modal" onclick="cbdrop(event,'preset-modal')">
+  <div class="sheet">
+    <div class="handle"></div>
+    <div class="stitle">Typ wyjścia</div>
+    <div class="pgrid-l" id="pm-grid"></div>
+    <div class="brow" style="margin-top:14px">
+      <button class="btn btn-g" onclick="closeModal('preset-modal')">Anuluj</button>
+      <button class="btn btn-p" onclick="applyPreset()">Zastosuj ✓</button>
+    </div>
+    <div style="margin-top:8px">
+      <button class="btn btn-g" onclick="clearPreset()">✕ Wyczyść zestaw</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ MODAL: ADD / EDIT ITEM ══════════ -->
+<div class="bdrop" id="item-modal" onclick="cbdrop(event,'item-modal')">
+  <div class="sheet">
+    <div class="handle"></div>
+    <div class="stitle" id="im-ttl">Dodaj rzecz</div>
+
+    <div class="fg">
+      <label class="fl">Nazwa</label>
+      <input class="fi" type="text" id="im-name" placeholder="np. pieluszki" autocomplete="off">
+    </div>
+
+    <div class="fg">
+      <label class="fl">Kategoria</label>
+      <select class="fi" id="im-cat"></select>
+    </div>
+
+    <div class="fg">
+      <label class="fl">Dla kogo</label>
+      <div class="csel">
+        <div class="csb" data-cc="marysia" onclick="setIC('marysia')"><div class="cse">👧</div><div class="csl">Marysia</div></div>
+        <div class="csb" data-cc="antos"   onclick="setIC('antos')"  ><div class="cse">👦</div><div class="csl">Antoś</div></div>
+        <div class="csb" data-cc="oba"     onclick="setIC('oba')"    ><div class="cse">👪</div><div class="csl">Oboje</div></div>
+        <div class="csb" data-cc="rodzic"  onclick="setIC('rodzic')" ><div class="cse">🧑</div><div class="csl">Rodzic</div></div>
+      </div>
+    </div>
+
+    <div class="fg">
+      <label class="fl">Typ</label>
+      <div class="tg" id="im-types">
+        <button class="tb" data-t="req" onclick="togT(this)">⭐ Obowiązkowe</button>
+        <button class="tb" data-t="sea" onclick="togT(this)">🌤️ Sezonowe</button>
+        <button class="tb" data-t="eme" onclick="togT(this)">🚨 Awaryjne</button>
+        <button class="tb" data-t="opt" onclick="togT(this)">✅ Opcjonalne</button>
+      </div>
+    </div>
+
+    <div class="fg">
+      <label class="fl">Przypisz do zestawów wyjść</label>
+      <div class="pgrid-s" id="im-presets"></div>
+    </div>
+
+    <div class="brow">
+      <button class="btn btn-g" onclick="closeModal('item-modal')">Anuluj</button>
+      <button class="btn btn-p" onclick="saveItem()">Zapisz</button>
+    </div>
+    <div id="im-del" style="display:none;margin-top:8px">
+      <button class="btn btn-d" onclick="deleteItem()">🗑️ Usuń tę rzecz</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ MODAL: RESET ══════════ -->
+<div class="bdrop" id="rst-modal" onclick="cbdrop(event,'rst-modal')">
+  <div class="sheet">
+    <div class="handle"></div>
+    <div class="stitle">Resetuj checklistę?</div>
+    <p style="color:var(--text2);font-size:14px;line-height:1.6;margin-bottom:16px">Wszystkie odhaczone rzeczy zostaną odznaczone. Zestaw i ustawienia pozostają.</p>
+    <div class="brow">
+      <button class="btn btn-g" onclick="closeModal('rst-modal')">Anuluj</button>
+      <button class="btn btn-p" onclick="doReset()">Resetuj ✓</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════
+//  STATIC DATA
+// ══════════════════════════════════════
+const CATS=[
+  {id:'food',   n:'🍼 Jedzenie'},
+  {id:'hygiene',n:'🧴 Higiena'},
+  {id:'clothes',n:'👕 Ubrania'},
+  {id:'weather',n:'🌤️ Pogoda'},
+  {id:'sleep',  n:'😴 Sen'},
+  {id:'play',   n:'🧸 Zabawa'},
+  {id:'transp', n:'🚗 Transport'},
+  {id:'docs',   n:'📄 Dokumenty'},
+  {id:'aid',    n:'🩹 Apteczka'},
+  {id:'parent', n:'🧑 Rodzic'},
+];
+
+// child: 'marysia'|'antos'|'oba'|'rodzic'
+const IDEF=[
+  {id:'f01',cat:'food',   n:'Termos z ciepłą wodą',    req:1,child:'oba'},
+  {id:'f02',cat:'food',   n:'Termos z herbatą',              child:'oba'},
+  {id:'f03',cat:'food',   n:'Dodatkowa butelka wody',   req:1,child:'oba'},
+  {id:'f04',cat:'food',   n:'Bidon dla starszego',      req:1,child:'marysia'},
+  {id:'f05',cat:'food',   n:'Zapas mleka gotowego',     req:1,child:'antos'},
+  {id:'f06',cat:'food',   n:'Kaszka w tubce',                child:'marysia'},
+  {id:'f07',cat:'food',   n:'Mus owocowy',                   child:'marysia'},
+  {id:'f08',cat:'food',   n:'Banan',                         child:'marysia'},
+  {id:'f09',cat:'food',   n:'Chrupki kukurydziane',          child:'marysia'},
+  {id:'f10',cat:'food',   n:'Sucharki',                      child:'oba'},
+  {id:'f11',cat:'food',   n:'Biszkopty',                     child:'oba'},
+  {id:'f12',cat:'food',   n:'Przekąska dla rodzica',         child:'rodzic'},
+  {id:'f13',cat:'food',   n:'Mała łyżeczka',                 child:'oba'},
+  {id:'f14',cat:'food',   n:'Plastikowa miseczka',           child:'oba'},
+  {id:'f15',cat:'food',   n:'Śliniak silikonowy',      req:1,child:'oba'},
+  {id:'f16',cat:'food',   n:'Podgrzewacz do butelki USB',    child:'antos'},
+  {id:'f17',cat:'food',   n:'Pojemnik mleko w proszku',      child:'antos'},
+  {id:'f18',cat:'food',   n:'Zapasowa porcja mleka',         child:'antos'},
+  {id:'f19',cat:'food',   n:'Kubek niekapek',                child:'marysia'},
+  {id:'f20',cat:'food',   n:'Mały termos obiadowy',          child:'oba'},
+  {id:'f21',cat:'food',   n:'Śniadaniówka',                  child:'oba'},
+  {id:'f22',cat:'food',   n:'Mokre chusteczki do rąk', req:1,child:'oba'},
+  {id:'f23',cat:'food',   n:'Ręcznik papierowy',             child:'oba'},
+  {id:'h01',cat:'hygiene',n:'Podkład do przewijania',  req:1,child:'antos'},
+  {id:'h02',cat:'hygiene',n:'Jednorazowe podkłady',         child:'antos'},
+  {id:'h03',cat:'hygiene',n:'Krem przeciw odparzeniom',req:1,child:'antos'},
+  {id:'h04',cat:'hygiene',n:'Żel antybakteryjny',      req:1,child:'oba'},
+  {id:'h05',cat:'hygiene',n:'Małe mydełko',                  child:'oba'},
+  {id:'h06',cat:'hygiene',n:'Zapas pieluch',           req:1,child:'antos'},
+  {id:'h07',cat:'hygiene',n:'Woreczki na pieluchy',    req:1,child:'antos'},
+  {id:'h08',cat:'hygiene',n:'Spray do dezynfekcji',         child:'oba'},
+  {id:'h09',cat:'hygiene',n:'Ręcznik dla dziecka',          child:'oba'},
+  {id:'h10',cat:'hygiene',n:'Ręcznik szybkoschnący',        child:'oba'},
+  {id:'h11',cat:'hygiene',n:'Szczoteczka do włosów',        child:'marysia'},
+  {id:'h12',cat:'hygiene',n:'Grzebyk',                      child:'oba'},
+  {id:'h13',cat:'hygiene',n:'Aspirator do nosa',      eme:1, child:'antos'},
+  {id:'h14',cat:'hygiene',n:'Sól fizjologiczna',       eme:1, child:'antos'},
+  {id:'h15',cat:'hygiene',n:'Patyczki higieniczne',         child:'oba'},
+  {id:'h16',cat:'hygiene',n:'Zapasowy smoczek',        req:1,child:'antos'},
+  {id:'a01',cat:'aid',    n:'Mini apteczka',            req:1,child:'oba'},
+  {id:'a02',cat:'aid',    n:'Plasterki',                req:1,child:'oba'},
+  {id:'a03',cat:'aid',    n:'Termometr',                req:1,child:'oba'},
+  {id:'a04',cat:'aid',    n:'Lek przeciwgorączkowy',    req:1,child:'oba'},
+  {id:'a05',cat:'aid',    n:'Lek przeciwalergiczny',    eme:1,child:'oba'},
+  {id:'a06',cat:'aid',    n:'Małe nożyczki',                 child:'oba'},
+  {id:'a07',cat:'aid',    n:'Gaziki',                        child:'oba'},
+  {id:'a08',cat:'aid',    n:'Środek dezynfekcji rany',  req:1,child:'oba'},
+  {id:'c01',cat:'clothes',n:'Dodatkowe body',           req:1,child:'antos'},
+  {id:'c02',cat:'clothes',n:'Dodatkowa koszulka',            child:'marysia'},
+  {id:'c03',cat:'clothes',n:'Dodatkowe spodnie',        req:1,child:'oba'},
+  {id:'c04',cat:'clothes',n:'Dodatkowe skarpetki',      req:1,child:'oba'},
+  {id:'c05',cat:'clothes',n:'Rajstopki',                     child:'marysia'},
+  {id:'c06',cat:'clothes',n:'Cienka czapka',                 child:'oba'},
+  {id:'c07',cat:'clothes',n:'Gruba czapka',             sea:1,child:'oba'},
+  {id:'c08',cat:'clothes',n:'Rękawiczki',               sea:1,child:'oba'},
+  {id:'c09',cat:'clothes',n:'Komin',                    sea:1,child:'oba'},
+  {id:'c10',cat:'clothes',n:'Bluza',                         child:'oba'},
+  {id:'c11',cat:'clothes',n:'Cienki sweterek',               child:'oba'},
+  {id:'c12',cat:'clothes',n:'Kurtka przeciwdeszczowa',  sea:1,child:'oba'},
+  {id:'c13',cat:'clothes',n:'Kombinezon',               sea:1,child:'oba'},
+  {id:'c14',cat:'clothes',n:'Kalosze',                  sea:1,child:'marysia'},
+  {id:'c15',cat:'clothes',n:'Buty na zmianę',                child:'oba'},
+  {id:'c16',cat:'clothes',n:'Worek na mokre ubrania',        child:'oba'},
+  {id:'w01',cat:'weather',n:'Śpiworek do wózka',        sea:1,child:'antos'},
+  {id:'w02',cat:'weather',n:'Koc termiczny',             sea:1,child:'oba'},
+  {id:'w03',cat:'weather',n:'Parasolka do wózka',            child:'oba'},
+  {id:'w04',cat:'weather',n:'Osłona przeciwdeszczowa',       child:'oba'},
+  {id:'w05',cat:'weather',n:'Osłona przeciwsłoneczna',       child:'oba'},
+  {id:'w06',cat:'weather',n:'Okulary p/słoneczne dziecka',sea:1,child:'oba'},
+  {id:'w07',cat:'weather',n:'Krem UV',                   sea:1,child:'oba'},
+  {id:'w08',cat:'weather',n:'Spray na komary',           sea:1,child:'oba'},
+  {id:'w09',cat:'weather',n:'Moskitiera do wózka',       sea:1,child:'antos'},
+  {id:'s01',cat:'sleep',  n:'Ulubiona przytulanka',      req:1,child:'oba'},
+  {id:'s02',cat:'sleep',  n:'Pozytywka',                      child:'antos'},
+  {id:'s03',cat:'sleep',  n:'Biały szum (apka)',              child:'antos'},
+  {id:'s04',cat:'sleep',  n:'Mała lampka nocna USB',          child:'antos'},
+  {id:'s05',cat:'sleep',  n:'Zawieszka do smoczka',           child:'antos'},
+  {id:'s06',cat:'sleep',  n:'Cienki kocyk do drzemki',        child:'oba'},
+  {id:'s07',cat:'sleep',  n:'Mata do leżenia',                child:'antos'},
+  {id:'s08',cat:'sleep',  n:'Poduszka podróżna',              child:'oba'},
+  {id:'s09',cat:'sleep',  n:'Otulacz',                        child:'antos'},
+  {id:'p01',cat:'play',   n:'Mała książeczka',               child:'oba'},
+  {id:'p02',cat:'play',   n:'Książeczka sensoryczna',         child:'antos'},
+  {id:'p03',cat:'play',   n:'Kolorowanka',                    child:'marysia'},
+  {id:'p04',cat:'play',   n:'Kredki',                         child:'marysia'},
+  {id:'p05',cat:'play',   n:'Naklejki',                       child:'marysia'},
+  {id:'p06',cat:'play',   n:'Zabawka do fotelika',            child:'antos'},
+  {id:'p07',cat:'play',   n:'Zabawka sensoryczna',            child:'antos'},
+  {id:'p08',cat:'play',   n:'Grzechotka',                     child:'antos'},
+  {id:'p09',cat:'play',   n:'Mały samochodzik',               child:'marysia'},
+  {id:'p10',cat:'play',   n:'Figurki',                        child:'marysia'},
+  {id:'p11',cat:'play',   n:'Bańki mydlane',                  child:'marysia'},
+  {id:'p12',cat:'play',   n:'Tablet offline z bajkami',       child:'marysia'},
+  {id:'p13',cat:'play',   n:'Słuchawki dziecięce',            child:'marysia'},
+  {id:'p14',cat:'play',   n:'Ładowarka do tabletu',           child:'rodzic'},
+  {id:'p15',cat:'play',   n:'Powerbank',                      child:'rodzic'},
+  {id:'t01',cat:'transp', n:'Adaptery do wózka',              child:'oba'},
+  {id:'t02',cat:'transp', n:'Zapasowa wkładka do wózka',      child:'antos'},
+  {id:'t03',cat:'transp', n:'Organizer do wózka',             child:'oba'},
+  {id:'t04',cat:'transp', n:'Haczyki do torby',               child:'oba'},
+  {id:'t05',cat:'transp', n:'Pompka do kół',                  child:'oba'},
+  {id:'t06',cat:'transp', n:'Zapasowa dętka',                 child:'oba'},
+  {id:'t07',cat:'transp', n:'Ładowarka samochodowa',          child:'rodzic'},
+  {id:'t08',cat:'transp', n:'Mata pod fotelik',               child:'oba'},
+  {id:'t09',cat:'transp', n:'Osłony p/słoneczne na szyby',    child:'oba'},
+  {id:'t10',cat:'transp', n:'Nosidełko',                      child:'antos'},
+  {id:'t11',cat:'transp', n:'Chusta do noszenia',             child:'antos'},
+  {id:'d01',cat:'docs',   n:'Dokumenty dziecka',         req:1,child:'oba'},
+  {id:'d02',cat:'docs',   n:'Książeczka zdrowia',         req:1,child:'oba'},
+  {id:'d03',cat:'docs',   n:'Karta EKUZ',                 eme:1,child:'oba'},
+  {id:'d04',cat:'docs',   n:'Dowód rodzica',              req:1,child:'rodzic'},
+  {id:'d05',cat:'docs',   n:'Karta płatnicza',            req:1,child:'rodzic'},
+  {id:'d06',cat:'docs',   n:'Gotówka',                         child:'rodzic'},
+  {id:'r01',cat:'parent', n:'Portfel',                    req:1,child:'rodzic'},
+  {id:'r02',cat:'parent', n:'Telefon',                    req:1,child:'rodzic'},
+  {id:'r03',cat:'parent', n:'Klucze',                     req:1,child:'rodzic'},
+  {id:'r04',cat:'parent', n:'Ładowarka',                       child:'rodzic'},
+  {id:'r05',cat:'parent', n:'Słuchawki',                       child:'rodzic'},
+  {id:'r06',cat:'parent', n:'Powerbank',                       child:'rodzic'},
+  {id:'r07',cat:'parent', n:'Kawa',                            child:'rodzic'},
+  {id:'r08',cat:'parent', n:'Przekąska dla rodzica',           child:'rodzic'},
+  {id:'r09',cat:'parent', n:'Tabletki przeciwbólowe',     eme:1,child:'rodzic'},
+  {id:'r10',cat:'parent', n:'Koszulka na zmianę',              child:'rodzic'},
+  {id:'r11',cat:'parent', n:'Dezodorant',                      child:'rodzic'},
+  {id:'r12',cat:'parent', n:'Chusteczki higieniczne',     req:1,child:'rodzic'},
+  {id:'r13',cat:'parent', n:'Notes',                           child:'rodzic'},
+  {id:'r14',cat:'parent', n:'Długopis',                        child:'rodzic'},
+];
+
+// defIds = preset membership used only at initialization
+const PRESETS=[
+  {id:'short',e:'🚶',n:'Krótki spacer',
+   defIds:['f03','f04','f05','f07','f09','f15','f22','h01','h06','h03','h04','h07','h16','c01','c04','s01','s05','p08','r01','r02','r03','r12']},
+  {id:'long', e:'🌳',n:'Długi spacer',
+   defIds:['f01','f03','f04','f05','f07','f09','f13','f15','f22','h01','h06','h03','h04','h07','h16','c01','c03','c04','a01','a02','a04','s01','s06','p01','p08','r01','r02','r03','r06','r12']},
+  {id:'day',  e:'☀️',n:'Cały dzień',
+   defIds:['f01','f02','f03','f04','f05','f06','f07','f09','f13','f14','f15','f19','f22','h01','h06','h03','h04','h07','h16','c01','c02','c03','c04','c16','a01','a02','a03','a04','s01','s06','s09','p01','p07','p12','r01','r02','r03','r06','r08','r12']},
+  {id:'car',  e:'🚗',n:'Podróż autem',
+   defIds:['f01','f03','f04','f05','f07','f09','f15','f22','h01','h06','h03','h04','h07','h16','c01','c03','c04','s01','s08','p06','p12','p13','t07','t08','t09','d01','d02','d04','d05','r01','r02','r03','r04','r06','r12']},
+  {id:'rest', e:'🍽️',n:'Restauracja',
+   defIds:['f07','f09','f13','f14','f15','f19','f22','h04','h07','c01','s01','s05','p07','r01','r02','r03','r12']},
+  {id:'shop', e:'🛒',n:'Zakupy',
+   defIds:['f03','f09','f15','f22','h06','h03','h04','h07','h16','s01','r01','r02','r03','r12']},
+  {id:'play', e:'🛝',n:'Plac zabaw',
+   defIds:['f03','f04','f07','f09','f15','f22','h01','h06','h03','h04','h07','h16','c01','c03','c04','c16','p11','r01','r02','r03','r12']},
+  {id:'doc',  e:'🏥',n:'Lekarz',
+   defIds:['f05','f22','h06','h03','h16','a01','a03','a04','d01','d02','d03','d04','d05','s01','p07','r01','r02','r03','r12']},
+  {id:'wknd', e:'🏡',n:'Weekend',
+   defIds:['f01','f02','f03','f04','f05','f06','f07','f09','f13','f14','f15','f19','f20','f22','h01','h02','h06','h03','h04','h07','h16','c01','c02','c03','c04','c10','c16','a01','a02','a03','a04','a05','s01','s06','s08','s09','p01','p03','p04','p07','p12','t07','t08','t09','d01','d02','d03','d04','d05','d06','r01','r02','r03','r04','r06','r08','r11','r12']},
+  {id:'win',  e:'❄️',n:'Wyjście zimą',
+   defIds:['f01','f03','f05','f22','h06','h03','h04','h07','h16','c01','c04','c07','c08','c09','c13','w01','w02','s01','r01','r02','r03','r12']},
+  {id:'sum',  e:'🌞',n:'Wyjście latem',
+   defIds:['f03','f04','f05','f07','f22','h06','h03','h04','h07','h16','c01','c06','w05','w06','w07','w08','w09','s01','r01','r02','r03','r12']},
+  {id:'rain', e:'🌧️',n:'Deszcz',
+   defIds:['f03','f05','f22','h06','h03','h04','h07','h16','c01','c12','c14','c16','w03','w04','s01','r01','r02','r03','r12']},
+];
+
+// ══════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════
+let S={
+  items:[],dark:0,preset:null,child:'all',cat:'all',view:'cl',
+  onlyUnchecked:0,reqFirst:1,
+  editId:null,selPreset:null,iTypes:[],iChild:'oba',iPresets:[],
+};
+
+// ══════════════════════════════════════
+//  STORAGE
+// ══════════════════════════════════════
+const KI='wych3_i',KS='wych3_s';
+
+function save(){
+  localStorage.setItem(KI,JSON.stringify(S.items));
+  localStorage.setItem(KS,JSON.stringify({dark:S.dark,preset:S.preset,onlyUnchecked:S.onlyUnchecked,reqFirst:S.reqFirst}));
+}
+
+function load(){
+  try{
+    const ri=localStorage.getItem(KI);
+    S.items=ri?migrate(JSON.parse(ri)):mkDef();
+    const rc=localStorage.getItem(KS);
+    if(rc){const c=JSON.parse(rc);S.dark=c.dark||0;S.preset=c.preset||null;S.onlyUnchecked=c.onlyUnchecked||0;S.reqFirst=c.reqFirst!==undefined?c.reqFirst:1;}
+  }catch{S.items=mkDef();}
+}
+
+function pmFromDef(){
+  const m={};PRESETS.forEach(p=>p.defIds.forEach(id=>{(m[id]=m[id]||[]).push(p.id);}));return m;
+}
+function mkDef(){
+  const pm=pmFromDef(),dm={};IDEF.forEach(i=>dm[i.id]=i);
+  return IDEF.map(i=>({id:i.id,cat:i.cat,n:i.n,req:i.req||0,sea:i.sea||0,eme:i.eme||0,opt:0,chk:0,child:i.child||'oba',presets:pm[i.id]||[]}));
+}
+function migrate(items){
+  const pm=pmFromDef(),dm={};IDEF.forEach(i=>dm[i.id]=i);
+  return items.map(i=>({...i,child:i.child!==undefined?i.child:(dm[i.id]?.child||'oba'),presets:i.presets!==undefined?i.presets:(pm[i.id]||[])}));
+}
+
+// ══════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+
+function getVisible(){
+  let items=[...S.items];
+  if(S.preset) items=items.filter(i=>i.presets.includes(S.preset));
+  if(S.child==='marysia') items=items.filter(i=>i.child==='marysia'||i.child==='oba');
+  else if(S.child==='antos') items=items.filter(i=>i.child==='antos'||i.child==='oba');
+  else if(S.child==='rodzic') items=items.filter(i=>i.child==='rodzic');
+  if(S.cat!=='all') items=items.filter(i=>i.cat===S.cat);
+  if(S.onlyUnchecked) items=items.filter(i=>!i.chk);
+  if(S.reqFirst) items.sort((a,b)=>b.req-a.req);
+  return items;
+}
+
+// ══════════════════════════════════════
+//  RENDER – CHECKLIST
+// ══════════════════════════════════════
+function renderCL(){
+  const items=getVisible();
+  const chk=items.filter(i=>i.chk).length;
+  document.getElementById('pfill').style.width=items.length?(chk/items.length*100)+'%':'0%';
+  document.getElementById('ptxt').textContent=chk+' / '+items.length;
+  if(!items.length){
+    document.getElementById('content').innerHTML=`<div class="empty"><div class="ee">${S.onlyUnchecked?'🎉':'🔍'}</div><p>${S.onlyUnchecked?'Wszystko spakowane!':'Brak rzeczy dla tego widoku'}</p></div>`;
+    return;
+  }
+  let html='';
+  if(S.cat==='all'){
+    const g={};items.forEach(i=>(g[i.cat]=g[i.cat]||[]).push(i));
+    CATS.forEach(c=>{
+      if(g[c.id]?.length){html+=`<div class="grp-hdr">${c.n}</div>`;g[c.id].forEach(i=>html+=iHtml(i));}
+    });
+    const kc=new Set(CATS.map(c=>c.id));
+    const ex=items.filter(i=>!kc.has(i.cat));
+    if(ex.length){html+='<div class="grp-hdr">Inne</div>';ex.forEach(i=>html+=iHtml(i));}
+  }else{
+    items.forEach(i=>html+=iHtml(i));
+  }
+  document.getElementById('content').innerHTML=html;
+}
+
+function chBadge(ch){
+  if(ch==='marysia')return'<span class="badge b-m">👧 Marysia</span>';
+  if(ch==='antos')  return'<span class="badge b-a">👦 Antoś</span>';
+  if(ch==='rodzic') return'<span class="badge b-r">🧑 Rodzic</span>';
+  return'';
+}
+
+function iHtml(i){
+  const bg=[];
+  if(i.req)bg.push('<span class="badge b-req">★ Obowiązkowe</span>');
+  if(i.sea)bg.push('<span class="badge b-sea">🌤️ Sezonowe</span>');
+  if(i.eme)bg.push('<span class="badge b-eme">🚨 Awaryjne</span>');
+  if(i.opt&&!i.req&&!i.sea&&!i.eme)bg.push('<span class="badge b-opt">Opcjonalne</span>');
+  if(S.child==='all'&&i.child!=='oba')bg.push(chBadge(i.child));
+  return`<div class="item${i.chk?' chk':''}" data-ch="${i.child}" onclick="toggle('${i.id}')">
+    <div class="cb"><span class="cbchk">✓</span></div>
+    <div class="iinfo">
+      <div class="iname">${esc(i.n)}</div>
+      ${bg.length?`<div class="imeta">${bg.join('')}</div>`:''}
+    </div>
+    <button class="edbtn" onclick="event.stopPropagation();openEdit('${i.id}')">✏️</button>
+  </div>`;
+}
+
+function renderCatFilter(){
+  let h=`<button class="catc${S.cat==='all'?' on':''}" onclick="setCat('all')">Wszystkie</button>`;
+  CATS.forEach(c=>h+=`<button class="catc${S.cat===c.id?' on':''}" onclick="setCat('${c.id}')">${c.n}</button>`);
+  document.getElementById('cat-row').innerHTML=h;
+}
+
+function renderPresetChip(){
+  const p=S.preset?PRESETS.find(x=>x.id===S.preset):null;
+  const btn=document.getElementById('pc-btn');
+  document.getElementById('pc-lbl').textContent=p?p.e+' '+p.n:'🎒 Wybierz typ wyjścia';
+  btn.className='pc-btn '+(p?'active':'inactive');
+}
+
+// ══════════════════════════════════════
+//  RENDER – PRESETS VIEW
+// ══════════════════════════════════════
+function renderPR(){
+  const cnt={};S.items.forEach(i=>i.presets.forEach(pid=>cnt[pid]=(cnt[pid]||0)+1));
+  let h='<div class="pgrid-l">';
+  PRESETS.forEach(p=>{
+    const a=S.preset===p.id;
+    h+=`<div class="pgc${a?' sel':''}" onclick="actPreset('${p.id}')"><div class="pe">${p.e}</div><div class="pn">${p.n}</div><div class="pct">${cnt[p.id]||0} rzeczy</div>${a?'<div class="pa">✓ Aktywny</div>':''}</div>`;
+  });
+  h+='</div>';
+  if(S.preset)h+=`<div style="margin-top:12px"><button class="btn btn-g" onclick="clearPreset()">✕ Wyczyść zestaw</button></div>`;
+  document.getElementById('content').innerHTML=h;
+}
+
+// ══════════════════════════════════════
+//  RENDER – SETTINGS
+// ══════════════════════════════════════
+function renderST(){
+  document.getElementById('content').innerHTML=`
+  <div class="sec-t">Wyświetlanie</div>
+  <div class="si" onclick="toggleDark()" style="cursor:pointer">
+    <div><div class="si-l">🌙 Tryb ciemny</div></div>
+    <div class="sw${S.dark?' on':''}"></div>
+  </div>
+  <div class="si" onclick="togUnch()" style="cursor:pointer">
+    <div><div class="si-l">👁️ Tylko niespakowane</div><div class="si-d">Ukryj odhaczone</div></div>
+    <div class="sw${S.onlyUnchecked?' on':''}"></div>
+  </div>
+  <div class="si" onclick="togReqFirst()" style="cursor:pointer">
+    <div><div class="si-l">⭐ Obowiązkowe na górze</div><div class="si-d">Sortuj według ważności</div></div>
+    <div class="sw${S.reqFirst?' on':''}"></div>
+  </div>
+  <div class="sec-t">Checklista</div>
+  <div class="si" onclick="openModal('rst-modal')" style="cursor:pointer">
+    <div><div class="si-l">🔄 Resetuj checklistę</div><div class="si-d">Odznacz wszystkie</div></div>
+    <span style="color:var(--text2)">›</span>
+  </div>
+  <div class="si" onclick="restoreDef()" style="cursor:pointer">
+    <div><div class="si-l">♻️ Przywróć domyślną listę</div><div class="si-d">Usuwa własne zmiany i przypisania</div></div>
+    <span style="color:var(--text2)">›</span>
+  </div>
+  <div class="sec-t">O aplikacji</div>
+  <div class="si">
+    <div><div class="si-l">🎒 Wychodzimy! v2.0</div><div class="si-d">👧 Marysia & 👦 Antoś • Działa offline</div></div>
+  </div>`;
+}
+
+// ══════════════════════════════════════
+//  ACTIONS – CHECKLIST
+// ══════════════════════════════════════
+function toggle(id){const i=S.items.find(x=>x.id===id);if(i){i.chk=i.chk?0:1;save();renderCL();}}
+function setCat(c){S.cat=c;renderCatFilter();renderCL();}
+function setChild(c){
+  S.child=c;
+  document.querySelectorAll('.chb').forEach(b=>b.classList.toggle('on',b.dataset.c===c));
+  renderCL();
+}
+function doReset(){S.items.forEach(i=>i.chk=0);save();closeModal('rst-modal');renderCL();}
+function restoreDef(){
+  if(confirm('Przywrócić domyślną listę? Własne rzeczy i wszystkie przypisania zostaną usunięte.')){
+    S.items=mkDef();save();renderCL();
+  }
+}
+
+// ══════════════════════════════════════
+//  ACTIONS – SETTINGS
+// ══════════════════════════════════════
+function toggleDark(){S.dark=S.dark?0:1;applyDark();save();if(S.view==='st')renderST();}
+function applyDark(){
+  document.documentElement.setAttribute('data-dark',S.dark?'1':'0');
+  document.getElementById('dark-btn').textContent=S.dark?'☀️':'🌙';
+}
+function togUnch(){S.onlyUnchecked=S.onlyUnchecked?0:1;save();renderST();renderCL();}
+function togReqFirst(){S.reqFirst=S.reqFirst?0:1;save();renderST();if(S.view==='cl')renderCL();}
+
+// ══════════════════════════════════════
+//  ACTIONS – PRESET
+// ══════════════════════════════════════
+function openPresetModal(){S.selPreset=S.preset;renderPM();openModal('preset-modal');}
+function renderPM(){
+  const cnt={};S.items.forEach(i=>i.presets.forEach(pid=>cnt[pid]=(cnt[pid]||0)+1));
+  document.getElementById('pm-grid').innerHTML=PRESETS.map(p=>
+    `<div class="pgc${S.selPreset===p.id?' sel':''}" onclick="selPtmp('${p.id}')">
+      <div class="pe">${p.e}</div><div class="pn">${p.n}</div><div class="pct">${cnt[p.id]||0} rzeczy</div>
+    </div>`
+  ).join('');
+}
+function selPtmp(id){S.selPreset=S.selPreset===id?null:id;renderPM();}
+function applyPreset(){S.preset=S.selPreset;save();closeModal('preset-modal');renderPresetChip();renderCL();}
+function clearPreset(){S.preset=null;S.selPreset=null;save();closeModal('preset-modal');renderPresetChip();renderCL();}
+function actPreset(id){S.preset=S.preset===id?null:id;save();renderPresetChip();renderPR();}
+
+// ══════════════════════════════════════
+//  ACTIONS – ITEM MODAL
+// ══════════════════════════════════════
+function buildCats(){
+  document.getElementById('im-cat').innerHTML=CATS.map(c=>`<option value="${c.id}">${c.n}</option>`).join('');
+}
+function renderIPresets(){
+  document.getElementById('im-presets').innerHTML=PRESETS.map(p=>
+    `<div class="pgs${S.iPresets.includes(p.id)?' on':''}" onclick="togIP('${p.id}')">
+      <div class="pge">${p.e}</div><div class="pgn">${p.n}</div>
+    </div>`
+  ).join('');
+}
+function setIC(c){
+  S.iChild=c;
+  document.querySelectorAll('.csb').forEach(b=>{
+    const cc=b.dataset.cc;
+    b.className='csb'+(cc===c?' on-'+(cc==='oba'?'b':cc==='rodzic'?'r':cc==='marysia'?'m':'a'):'');
+  });
+}
+function togIP(pid){
+  if(S.iPresets.includes(pid))S.iPresets=S.iPresets.filter(x=>x!==pid);
+  else S.iPresets.push(pid);
+  renderIPresets();
+}
+function togT(btn){
+  if(btn.classList.toggle('on'))S.iTypes.push(btn.dataset.t);
+  else S.iTypes=S.iTypes.filter(x=>x!==btn.dataset.t);
+}
+
+function openAddItem(){
+  S.editId=null;S.iTypes=[];S.iChild='oba';
+  S.iPresets=S.preset?[S.preset]:[];
+  document.getElementById('im-ttl').textContent='Dodaj rzecz';
+  document.getElementById('im-name').value='';
+  document.getElementById('im-del').style.display='none';
+  document.querySelectorAll('#im-types .tb').forEach(b=>b.classList.remove('on'));
+  buildCats();setIC('oba');renderIPresets();
+  openModal('item-modal');
+  setTimeout(()=>document.getElementById('im-name').focus(),320);
+}
+
+function openEdit(id){
+  const i=S.items.find(x=>x.id===id);if(!i)return;
+  S.editId=id;
+  S.iTypes=[];if(i.req)S.iTypes.push('req');if(i.sea)S.iTypes.push('sea');if(i.eme)S.iTypes.push('eme');if(i.opt)S.iTypes.push('opt');
+  S.iChild=i.child||'oba';
+  S.iPresets=[...(i.presets||[])];
+  document.getElementById('im-ttl').textContent='Edytuj: '+i.n;
+  document.getElementById('im-name').value=i.n;
+  document.getElementById('im-del').style.display='block';
+  buildCats();
+  document.getElementById('im-cat').value=i.cat;
+  document.querySelectorAll('#im-types .tb').forEach(b=>b.classList.toggle('on',S.iTypes.includes(b.dataset.t)));
+  setIC(S.iChild);renderIPresets();
+  openModal('item-modal');
+}
+
+function saveItem(){
+  const n=document.getElementById('im-name').value.trim();
+  if(!n){document.getElementById('im-name').focus();return;}
+  const props={n,cat:document.getElementById('im-cat').value,req:S.iTypes.includes('req')?1:0,sea:S.iTypes.includes('sea')?1:0,eme:S.iTypes.includes('eme')?1:0,opt:S.iTypes.includes('opt')?1:0,child:S.iChild,presets:[...S.iPresets]};
+  if(S.editId){const i=S.items.find(x=>x.id===S.editId);if(i)Object.assign(i,props);}
+  else S.items.push({id:'u'+Date.now(),chk:0,...props});
+  save();closeModal('item-modal');renderCL();
+}
+
+function deleteItem(){
+  if(!S.editId)return;
+  if(confirm('Usunąć tę rzecz?')){S.items=S.items.filter(x=>x.id!==S.editId);save();closeModal('item-modal');renderCL();}
+}
+
+// ══════════════════════════════════════
+//  VIEW SWITCHING
+// ══════════════════════════════════════
+function switchView(v){
+  S.view=v;
+  ['cl','pr','st'].forEach(x=>document.getElementById('nb-'+x).classList.toggle('on',x===v));
+  const clh=document.getElementById('cl-hdr'),alth=document.getElementById('alt-hdr'),fab=document.getElementById('fab');
+  if(v==='cl'){
+    clh.style.display='';alth.style.display='none';fab.style.display='';
+    renderCatFilter();renderCL();
+  }else if(v==='pr'){
+    clh.style.display='none';alth.style.display='';fab.style.display='none';
+    document.getElementById('alt-ttl').textContent='🗂️ Zestawy wyjść';renderPR();
+  }else{
+    clh.style.display='none';alth.style.display='';fab.style.display='none';
+    document.getElementById('alt-ttl').textContent='⚙️ Ustawienia';renderST();
+  }
+}
+
+// ══════════════════════════════════════
+//  MODAL HELPERS
+// ══════════════════════════════════════
+function openModal(id){document.getElementById(id).classList.add('show');}
+function closeModal(id){document.getElementById(id).classList.remove('show');}
+function cbdrop(e,id){if(e.target===e.currentTarget)closeModal(id);}
+
+// ══════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════
+function init(){
+  load();applyDark();renderCatFilter();renderPresetChip();buildCats();renderCL();
+  if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+init();
+</script>
+</body>
+</html>
