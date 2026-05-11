@@ -1,4 +1,4 @@
-const CACHE = 'wychodzimy-v1';
+const CACHE = 'wychodzimy-v3';
 const ASSETS = [
   '/',
   '/index.html',
