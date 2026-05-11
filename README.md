@@ -102,4 +102,4 @@ Wszystko jest w `index.html`. Żeby edytować:
 
 ## 📄 Licencja
 
-MIT — rób co chcesz, używaj, modyfikuj, dziel się.
+MIT — rób co chcesz, używaj, modyfikuj,  dziel się.
